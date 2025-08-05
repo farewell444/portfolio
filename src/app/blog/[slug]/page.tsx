@@ -8,7 +8,10 @@ import { PortableTextComponent } from '@/components/PortableTextComponent'
 import type { Metadata } from 'next'
 import { Post } from '@/lib/types'
 
+// Мы типизируем 'params' напрямую в каждой функции, используя самый простой и правильный синтаксис.
+// Это устраняет любые конфликты с внутренними типами Next.js.
 
+// Генерируем мета-теги для конкретного поста
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const post = await client.fetch<Post>(POST_QUERY, { slug: params.slug })
   if (!post) return notFound()
