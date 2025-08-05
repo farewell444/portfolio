@@ -9,12 +9,7 @@ import type { Metadata } from 'next'
 import { Post } from '@/lib/types'
 
 
-type Props = {
-  params: { slug: string };
-  searchParams: { [key: string]: string | string[] | undefined };
-};
-
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const post = await client.fetch<Post>(POST_QUERY, { slug: params.slug })
   if (!post) return notFound()
 
@@ -29,6 +24,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
+// Генерируем все возможные страницы постов во время сборки
 export async function generateStaticParams() {
   const posts = await client.fetch<Post[]>(POSTS_QUERY)
   return posts.map((post) => ({
@@ -36,7 +32,8 @@ export async function generateStaticParams() {
   }))
 }
 
-export default async function PostPage({ params }: Props) {
+// Компонент страницы
+export default async function PostPage({ params }: { params: { slug: string } }) {
   const post = await client.fetch<Post>(POST_QUERY, { slug: params.slug })
 
   if (!post) {
