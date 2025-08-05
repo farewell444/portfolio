@@ -8,14 +8,15 @@ import { PortableTextComponent } from '@/components/PortableTextComponent'
 import type { Metadata } from 'next'
 import { Post } from '@/lib/types'
 
-type PageProps = {
-  params: {
-    slug: string
-  }
-}
+// Мы НЕ создаем здесь кастомный тип PageProps.
+// Вместо этого мы типизируем 'params' напрямую в каждой функции.
 
-// Метаданные для поста
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+// Генерируем мета-теги для конкретного поста
+export async function generateMetadata({
+  params,
+}: {
+  params: { slug: string }
+}): Promise<Metadata> {
   const post = await client.fetch<Post>(POST_QUERY, { slug: params.slug })
   if (!post) return notFound()
 
@@ -30,7 +31,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 }
 
-// Статические маршруты
+// Генерируем все возможные страницы постов во время сборки
 export async function generateStaticParams() {
   const posts = await client.fetch<Post[]>(POSTS_QUERY)
   return posts.map((post) => ({
@@ -38,8 +39,12 @@ export async function generateStaticParams() {
   }))
 }
 
-// Страница поста
-export default async function PostPage({ params }: PageProps) {
+// Компонент страницы
+export default async function PostPage({
+  params,
+}: {
+  params: { slug: string }
+}) {
   const post = await client.fetch<Post>(POST_QUERY, { slug: params.slug })
 
   if (!post) {
