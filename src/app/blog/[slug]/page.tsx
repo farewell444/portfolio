@@ -8,11 +8,14 @@ import { PortableTextComponent } from '@/components/PortableTextComponent'
 import type { Metadata } from 'next'
 import { Post } from '@/lib/types'
 
-// Мы типизируем 'params' напрямую в каждой функции, используя самый простой и правильный синтаксис.
-// Это устраняет любые конфликты с внутренними типами Next.js.
+type PageProps = {
+  params: {
+    slug: string
+  }
+}
 
-// Генерируем мета-теги для конкретного поста
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+// Метаданные для поста
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const post = await client.fetch<Post>(POST_QUERY, { slug: params.slug })
   if (!post) return notFound()
 
@@ -27,7 +30,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   }
 }
 
-// Генерируем все возможные страницы постов во время сборки
+// Статические маршруты
 export async function generateStaticParams() {
   const posts = await client.fetch<Post[]>(POSTS_QUERY)
   return posts.map((post) => ({
@@ -35,8 +38,8 @@ export async function generateStaticParams() {
   }))
 }
 
-// Компонент страницы
-export default async function PostPage({ params }: { params: { slug: string } }) {
+// Страница поста
+export default async function PostPage({ params }: PageProps) {
   const post = await client.fetch<Post>(POST_QUERY, { slug: params.slug })
 
   if (!post) {
@@ -49,16 +52,16 @@ export default async function PostPage({ params }: { params: { slug: string } })
       <p className="text-muted-foreground text-lg mb-8">
         {format(new Date(post.publishedAt), 'PPP')}
       </p>
-      
+
       <div className="relative aspect-video mb-12">
-        <Image 
-          src={urlForImage(post.coverImage).url()} 
-          alt={post.title} 
-          fill 
-          className="object-cover rounded-lg" 
+        <Image
+          src={urlForImage(post.coverImage).url()}
+          alt={post.title}
+          fill
+          className="object-cover rounded-lg"
         />
       </div>
-      
+
       <PortableTextComponent value={post.content} />
     </article>
   )
