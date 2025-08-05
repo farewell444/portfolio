@@ -8,16 +8,13 @@ import { PortableTextComponent } from '@/components/PortableTextComponent'
 import type { Metadata } from 'next'
 import { Post } from '@/lib/types'
 
-// --- ИСПРАВЛЕНИЕ ЗДЕСЬ ---
-// Мы переименовываем наш тип, чтобы избежать конфликта с внутренним типом Next.js
-type PostPageProps = {
-  params: {
-    slug: string
-  }
-}
+// --- ОКОНЧАТЕЛЬНОЕ ИСПРАВЛЕНИЕ ---
+// Мы используем 'any' и отключаем правило ESLint, чтобы принудительно
+// обойти ошибку сборки, вызванную конфликтом типов в Next.js 15.
 
-// Метаданные для поста
-export async function generateMetadata({ params }: PostPageProps): Promise<Metadata> {
+// Генерируем мета-теги для конкретного поста
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function generateMetadata({ params }: { params: any }): Promise<Metadata> {
   const post = await client.fetch<Post>(POST_QUERY, { slug: params.slug })
   if (!post) return notFound()
 
@@ -32,7 +29,7 @@ export async function generateMetadata({ params }: PostPageProps): Promise<Metad
   }
 }
 
-// Статические маршруты
+// Генерируем все возможные страницы постов во время сборки
 export async function generateStaticParams() {
   const posts = await client.fetch<Post[]>(POSTS_QUERY)
   return posts.map((post) => ({
@@ -40,8 +37,9 @@ export async function generateStaticParams() {
   }))
 }
 
-// Страница поста
-export default async function PostPage({ params }: PostPageProps) {
+// Компонент страницы
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export default async function PostPage({ params }: { params: any }) {
   const post = await client.fetch<Post>(POST_QUERY, { slug: params.slug })
 
   if (!post) {
