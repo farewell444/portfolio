@@ -6,14 +6,16 @@ import { urlForImage } from '@/sanity/lib/image'
 import { format } from 'date-fns'
 import { PortableTextComponent } from '@/components/PortableTextComponent'
 import type { Metadata } from 'next'
-import { Post } from '@/lib/types' // <-- ИМПОРТ
+import { Post } from '@/lib/types'
+
 
 type Props = {
-  params: { slug: string }
-}
+  params: { slug: string };
+  searchParams: { [key: string]: string | string[] | undefined };
+};
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const post = await client.fetch<Post>(POST_QUERY, { slug: params.slug }) // <-- ТИП
+  const post = await client.fetch<Post>(POST_QUERY, { slug: params.slug })
   if (!post) return notFound()
 
   return {
@@ -28,14 +30,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export async function generateStaticParams() {
-  const posts = await client.fetch<Post[]>(POSTS_QUERY) // <-- ТИП
+  const posts = await client.fetch<Post[]>(POSTS_QUERY)
   return posts.map((post) => ({
     slug: post.slug.current,
   }))
 }
 
 export default async function PostPage({ params }: Props) {
-  const post = await client.fetch<Post>(POST_QUERY, { slug: params.slug }) // <-- ТИП
+  const post = await client.fetch<Post>(POST_QUERY, { slug: params.slug })
 
   if (!post) {
     return notFound()
